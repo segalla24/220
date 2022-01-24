@@ -23,7 +23,7 @@ class TestItem:
 
 class Test(TestItem):
     def __init__(self, name, actual=None, expected=None, data=None, points=None, fail_fast=False,
-                 show_actual_expected=True, exception_message=None, comp_func=None):
+                 show_actual_expected=True, exception_message=None, comp_func=None, **kwargs):
         """
         A Test in a Test Suite.
 
@@ -46,12 +46,14 @@ class Test(TestItem):
         self.show_actual_expected = show_actual_expected
         self.exception_message = exception_message
         self.comp_func = comp_func
+        self.letter_grades = True if 'letter_grades' not in kwargs else kwargs['letter_grades']
 
     def passed(self):
         self.earned_points += self.default_points
         self.total_points += self.default_points
         tabs = '\t' * self.level
-        print(f"{tabs}PASSED: +{self.total_points} - {self.name}")
+        grade = '\N{check mark}' if self.letter_grades else f'+{self.total_points}'
+        print(f"{tabs}PASSED: {grade} - {self.name}")
 
     def failed(self, result, e=None):
         """
@@ -60,7 +62,8 @@ class Test(TestItem):
         """
         self.total_points += self.default_points
         tabs = '\t' * self.level
-        print(f'{tabs}FAILED: -{self.default_points}: {self.name}')
+        grade = '\N{ballot x}' if self.letter_grades else f'-{self.default_points}'
+        print(f'{tabs}FAILED: {grade} - {self.name}')
         if self.fail_fast:
             sys.exit()
         if e:
@@ -101,7 +104,7 @@ class Test(TestItem):
 
 
 class Section(TestItem):
-    def __init__(self, name, points=None, custom_total_points=None, group_data=None):
+    def __init__(self, name, points=None, custom_total_points=None, group_data=None, **kwargs):
         """
         A section of a Test Suite. Can be made up of other sections and/or individual :class:`Test <tests.test_framework.TestItem>`
 
@@ -119,6 +122,7 @@ class Section(TestItem):
             self.earned_points = custom_total_points
         # used to indicate if one set of test data should be used for all the tests
         self.group_data = group_data
+        self.letter_grades = True if 'letter_grades' not in kwargs else kwargs['letter_grades']
 
     def add_items(self, *items: TestItem):
         for item in items:
@@ -143,7 +147,9 @@ class Section(TestItem):
             print(f'{tabs}\tdata:')
             for line in self.group_data:
                 print(f'{tabs}\t\t{line}')
-        end_label = f' {self.name} end {self.earned_points}/{self.total_points} '
+        grade = score_to_letter(
+            self.earned_points * 100 / self.total_points) if self.letter_grades else f'{self.earned_points}/{self.total_points}'
+        end_label = f' {self.name} end: {grade} '
         print('{0}{1:-^70}'.format(tabs, end_label))
 
 
@@ -162,7 +168,7 @@ class TestBuilder:
 
     """
 
-    def __init__(self, name, file_name, linter_points, default_test_points=1):
+    def __init__(self, name, file_name, linter_points, default_test_points=1, **kwargs):
         """
         The builder of a test suite. Can be made up of sections and/or individual tests`
 
@@ -177,10 +183,11 @@ class TestBuilder:
         self.default_test_points = default_test_points
         self.name = name
         self.blacklist = {
-            'importos': 'no need for the os module. please remove it to continue.',
-            'fromos': 'no need for the os module. please remove it to continue.',
-            'importpathlib': 'no need for the pathlib module. please remove it to continue.',
-            'frompathlib': 'no need for the pathlib module. please remove it to continue.',
+            'import.*os': 'no need for the os module. please remove it to continue.',
+            'from.*os': 'no need for the os module. please remove it to continue.',
+            'import.*pathlib': 'no need for the pathlib module. please remove it to continue.',
+            'from.*pathlib': 'no need for the pathlib module. please remove it to continue.',
+            '\[.*for.*in.*\]': 'list comprehension is not allowed. please remove it to continue'
         }
         self.file_name = file_name
         self.rc_file = '../../.pylintrc'
@@ -188,9 +195,7 @@ class TestBuilder:
         self.blacklist_func = create_blacklist_test()
         self.lint_func = create_lint_test()
         self.lint_tests = []
-
-    def create_blacklist_tests(self):
-        pass
+        self.letter_grades = True if 'letter_grades' not in kwargs else kwargs['letter_grades']
 
     def add_to_blacklist(self, items: dict):
         """
@@ -235,7 +240,9 @@ class TestBuilder:
             self.total_points += item.total_points
             self.earned_points += item.earned_points
         print()
-        test_outro = f' Test {self.name} complete: {self.earned_points}/{self.total_points} '
+        grade = score_to_letter(
+            self.earned_points * 100 / self.total_points) if self.letter_grades else f'{self.earned_points}/{self.total_points}'
+        test_outro = f' Test {self.name} complete: {grade} '
         print('{0}{1:=^80}'.format(tabs, test_outro))
 
 
@@ -244,7 +251,7 @@ class TestSuit:
     A TestSuit
     """
 
-    def __init__(self, name):
+    def __init__(self, name, **kwargs):
         """
         The test suite. Made up of test builders`
         :param name: the name of the test
@@ -254,6 +261,7 @@ class TestSuit:
         self.total_points = 0
         self.earned_points = 0
         self.name = name
+        self.letter_grades = True if 'letter_grades' not in kwargs else kwargs['letter_grades']
 
     def add_test_builders(self, *items: TestBuilder):
         for item in items:
@@ -272,8 +280,36 @@ class TestSuit:
             self.total_points += item.total_points
             self.earned_points += item.earned_points
         print()
-        test_outro = f' Test {self.name} complete: {self.earned_points}/{self.total_points} '
+        grade = score_to_letter(
+            self.earned_points * 100 / self.total_points) if self.letter_grades else f'{self.earned_points}/{self.total_points}'
+        test_outro = f' Test {self.name} complete: {grade} '
         print('{0:=^80}'.format(test_outro))
+
+
+def score_to_letter(score: float):
+    if score >= 93:
+        return 'A'
+    if score >= 90:
+        return 'A-'
+    if score >= 87:
+        return 'B+'
+    if score >= 83:
+        return 'B'
+    if score >= 80:
+        return 'B-'
+    if score >= 77:
+        return 'C+'
+    if score >= 73:
+        return 'C'
+    if score >= 70:
+        return 'C-'
+    if score >= 67:
+        return 'D+'
+    if score >= 63:
+        return 'D'
+    if score >= 60:
+        return 'D-'
+    return 'F'
 
 
 def run_safe(test):
@@ -316,11 +352,12 @@ def create_blacklist_test():
         tests = []
         with open(test_file, 'r') as file:
             for index, line in enumerate(file):
-                found_items = list(
-                    filter(lambda blacklist_key: blacklist_key in line.replace(' ', '').lower(), blacklist.keys()))
-                for item in found_items:
-                    tests.append(
-                        Test(f'Line {index + 1} - {blacklist[item]}', 0, 1, show_actual_expected=False, points=100))
+                for blacklist_item in blacklist:
+                    res = re.search(blacklist_item, line)
+                    if res:
+                        culprit = res.group()
+                        tests.append(Test(f'Line {index + 1} - {culprit} - {blacklist[blacklist_item]}', 0, 1,
+                                          show_actual_expected=False, points=100))
             try:
                 tests[-1].fail_fast = True
             except IndexError:
