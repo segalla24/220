@@ -24,11 +24,13 @@ def means():
         g_acc = value_amount * g_acc
     rms_acc = rms_acc / values
     rms = rms_acc ** 0.5
+    round_rms = round(rms, 3)
     harm = values / h_acc
     geo = g_acc ** (1/values)
-    print("RMS is: ", rms)
+    round_geo = round(geo, 3)
+    print("RMS is: ", round_rms)
     print("Harmonic is: ", harm)
-    print("Geometric is: ", geo)
+    print("Geometric is: ", round_geo)
 
 means()
 
