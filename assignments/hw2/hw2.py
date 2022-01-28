@@ -45,7 +45,7 @@ def sum_squares():
     up_range = eval(input("enter the upper range: "))
     sum= 0
     for i in range(lo_range, up_range+1, 1):
-        sum = sum + math.pow(i,2)
+        sum = sum + (i * i)
     print(sum)
 
 
