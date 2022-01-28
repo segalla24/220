@@ -37,8 +37,7 @@ def triangle_area():
     s_minus_b = s_perm - side_b
     s_minus_c = s_perm - side_c
     area = math.sqrt(s_perm*s_minus_a*s_minus_b*s_minus_c)
-    round_area = round(area, 2)
-    print("the area is", round_area)
+    print("the area is", area)
 
 
 def sum_squares():
@@ -46,7 +45,7 @@ def sum_squares():
     up_range = eval(input("enter the upper range: "))
     sum= 0
     for i in range(lo_range, up_range+1, 1):
-        sum = sum + math.pow(i, 2)
+        sum = sum + math.pow(i,2)
     print(sum)
 
 
