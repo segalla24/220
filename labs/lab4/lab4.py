@@ -46,7 +46,7 @@ def greeting_card():
     label.setTextColor("red")
     label.draw(win)
 
-    for i in range(6):
+    for i in range(7):
         a_line.move(100, -50)
         time.sleep(0.5)
 
