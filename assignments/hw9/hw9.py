@@ -100,7 +100,7 @@ def play_graphics(secret_word):
             correct_guess = make_hidden_secret(secret_word, my_list)
 
         else:
-            guess_amount -= 1
+            guess_amount = guess_amount - 1
             if guess_amount == 5:
                 head.draw(win)
             elif guess_amount == 4:
