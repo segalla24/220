@@ -59,7 +59,7 @@ def thee_door_game():
 
     win_msg = Text(Point(350,200), "You Win!")
     win_msg.setSize(14)
-    loss_msg = Text(Point(350,200), "Sorry, Incorrect")
+    loss_msg = Text(Point(350,200), "Sorry, Incorrect!")
     loss_msg.setSize(14)
     play_again_msg = Text(Point(350,650), "click anywhere to play again")
     play_again_msg.setSize(14)
@@ -72,47 +72,39 @@ def thee_door_game():
     elif secret == 3:
         door3.set_secret(True)
 
-    win_acc = 0
-    loss_acc = 0
-
-    win_0 = Text(Point(150,100), "0")
-    win_0.setSize(14)
-    win_0.draw(win)
-    loss_0 = Text(Point(250,100), "0")
-    loss_0.setSize(14)
-    loss_0.draw(win)
+    my_wins = []
+    my_losses = []
+    win_num = Text(Point(150, 100), "")
+    win_num.setSize(14)
+    win_num.draw(win)
+    win_num.setText(len(my_wins))
+    loss_num = Text(Point(250, 100), "")
+    loss_num.setSize(14)
+    loss_num.draw(win)
+    loss_num.setText(len(my_losses))
 
     point = win.getMouse()
     while not quit.is_clicked(point):
         if door1.is_secret() and door1.is_clicked(point):
             door1.color_door("green")
-            win_0.undraw()
-            win_acc += 1
-            win_num = Text(Point(150,100), win_acc)
-            win_num.setSize(14)
-            win_num.draw(win)
+            my_wins.append('w')
+            win_num.setText(len(my_wins))
             secret_msg.undraw()
             win_msg.draw(win)
             click_msg.undraw()
             play_again_msg.draw(win)
         elif door2.is_secret() and door2.is_clicked(point):
             door2.color_door("green")
-            win_0.undraw()
-            win_acc += 1
-            win_num = Text(Point(150, 100), win_acc)
-            win_num.setSize(14)
-            win_num.draw(win)
+            my_wins.append('w')
+            win_num.setText(len(my_wins))
             secret_msg.undraw()
             win_msg.draw(win)
             click_msg.undraw()
             play_again_msg.draw(win)
         elif door3.is_secret() and door3.is_clicked(point):
             door3.color_door("green")
-            win_0.undraw()
-            win_acc += 1
-            win_num = Text(Point(150, 100), win_acc)
-            win_num.setSize(14)
-            win_num.draw(win)
+            my_wins.append('w')
+            win_num.setText(len(my_wins))
             secret_msg.undraw()
             win_msg.draw(win)
             click_msg.undraw()
@@ -120,33 +112,36 @@ def thee_door_game():
         else:
             if not door1.is_secret() and door1.is_clicked(point):
                 door1.color_door("red")
-                loss_0.undraw()
-                loss_acc += 1
-                loss_num = Text(Point(250,100), loss_acc)
-                loss_num.setSize(14)
-                loss_num.draw(win)
+                if door2.is_secret():
+                    door2.color_door("green")
+                if door3.is_secret():
+                    door3.color_door("green")
+                my_losses.append('l')
+                loss_num.setText(len(my_losses))
                 secret_msg.undraw()
                 loss_msg.draw(win)
                 click_msg.undraw()
                 play_again_msg.draw(win)
             elif not door2.is_secret() and door2.is_clicked(point):
                 door2.color_door("red")
-                loss_0.undraw()
-                loss_acc += 1
-                loss_num = Text(Point(250, 100), loss_acc)
-                loss_num.setSize(14)
-                loss_num.draw(win)
+                if door1.is_secret():
+                    door1.color_door("green")
+                if door3.is_secret():
+                    door3.color_door("green")
+                my_losses.append('l')
+                loss_num.setText(len(my_losses))
                 secret_msg.undraw()
                 loss_msg.draw(win)
                 click_msg.undraw()
                 play_again_msg.draw(win)
             elif not door3.is_secret() and door3.is_clicked(point):
                 door3.color_door("red")
-                loss_0.undraw()
-                loss_acc += 1
-                loss_num = Text(Point(250, 100), loss_acc)
-                loss_num.setSize(14)
-                loss_num.draw(win)
+                if door1.is_secret():
+                    door1.color_door("green")
+                if door2.is_secret():
+                    door2.color_door("green")
+                my_losses.append('l')
+                loss_num.setText(len(my_losses))
                 secret_msg.undraw()
                 loss_msg.draw(win)
                 click_msg.undraw()
