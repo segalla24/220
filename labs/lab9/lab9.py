@@ -38,10 +38,8 @@ def print_board(board):
 
 
 def is_legal(board, position):
-    if str(board[position-1]).isnumeric():
-        return True
-    else:
-        return False
+    position_index = position - 1
+    return str(board[position_index]).isnumeric()
 
 
 def fill_spot(board, position, character):
@@ -101,29 +99,36 @@ def play(board):
           "Then player 'o' will do the same, this will be repeated" "\n" "until there is a winner or the game is tied. "
           "After the game is complete type a word beginning with the letter 'y' to play again, if not type anything "
           "else. :)")
-
-    while not game_over(board):
-        print_board(board)
-        list = ["x", "o"]
-        turn = eval(input("choose a position: "))
-        position = turn
-        character = str(list[0])
-        fill_spot(board, position, character)
-
-        turn2 = eval(input("choose a position: "))
-        position2 = turn2
-        character2 = str(list[1])
-        fill_spot(board, position2, character2)
-
-    ans = 'y'
-    while ans[0] == 'y':
-        winning_game(board)
-        ans = input("play again? ")
-        play(build_board())
+    playing = "y"
+    character_string = 'xo'
+    index = 0
+    while playing[0] == 'y' or playing[0] == "Y":
+        while not game_over(board):
+            print_board(board)
+            position = eval(input("{}'s, choose a position: ".format(character_string[index])))
+            while not is_legal(board, position):
+                position = input("that position is already filled...please choose a new position:")
+            else:
+                character = character_string[index]
+                fill_spot(board, position, character)
+            if winning_game(board):
+                print_board(board)
+                print(get_winner(board), "'s win!")
+                playing = input("play again: ")
+                board = build_board()
+                index = 1
+            if game_over(board) and not winning_game(board):
+                print("tie")
+                playing = input("play again: ")
+                board = build_board()
+                index = 1
+            index += 1
+            index = index % 2
 
 
 def main():
-    play(build_board())
+    board = build_board()
+    play(board)
 
 
 if __name__ == '__main__':
